@@ -1,6 +1,5 @@
 import scrapy
 
-
 class MotorcyclesSpider(scrapy.Spider):
     name = "motorcycles"
     allowed_domains = ["bikez.com"]
@@ -55,11 +54,15 @@ class MotorcyclesSpider(scrapy.Spider):
         bike_brand = response.selector.xpath("//h1/a/text()").getall()[0]
         bike_year = response.selector.xpath("//h1/a/text()").getall()[-1]
         tables = response.selector.xpath("//table[@class='Grid']")
+        specs_table = response.selector.xpath(
+                "//table[@class='Grid']//div[@id='GENERAL']/../../.."
+                )
     
         if len(tables) < 1:
             return
         elif len(tables) == 1:
-            bike_specs_dict = extract_specs(tables[0])
+            
+            bike_specs_dict = extract_specs(specs_table)
             yield {
                 'model': bike_model,
                 'brand': bike_brand,
@@ -67,9 +70,9 @@ class MotorcyclesSpider(scrapy.Spider):
                 'specs': bike_specs_dict
             }
         else:
-            bike_profile, bike_specs, *_ = tables
-            bike_specs_dict = extract_specs(bike_specs)
-            bike_profile = bike_profile.xpath(".//tr[2]//td/text()").get()
+            
+            bike_specs_dict = extract_specs(specs_table)
+            bike_profile = response.xpath("//*[contains(text(), 'profilation')]/../../..//tr[2]//text()").get()
             yield {
                 'model': bike_model,
                 'brand': bike_brand,
