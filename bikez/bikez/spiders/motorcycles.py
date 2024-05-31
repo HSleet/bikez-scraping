@@ -35,16 +35,17 @@ class MotorcyclesSpider(scrapy.Spider):
             return text
         
         def join_text(text_list):
-            return " ".join([normalize_spaces(text) for text in text_list]) 
+            return " ".join([normalize_spaces(text) for text in text_list]).strip()
 
         def extract_specs(table):
             specs = table.xpath(".//tr")
             specs_dict = {}
             for spec in specs:
-                spec_name = join_text(spec.xpath(".//td[1]//b/text()").getall())
+                spec_name = join_text(spec.xpath(".//td[1]//b//text()").getall())
+
                 spec_value = join_text(spec.xpath(".//td[2]//text()").getall())
                 if type(spec_value) == list:
-                    spec_value = " ".join(spec_value)
+                    spec_value = " ".join(spec_value).strip()
                 
                 specs_dict[spec_name] = spec_value
             return specs_dict
